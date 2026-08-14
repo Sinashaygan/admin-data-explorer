@@ -14,7 +14,10 @@ const columns: GridColDef[] = [
     headerName: "Amount",
     type: "number",
     width: 120,
-    valueFormatter: (params) => `$${params.value.toLocaleString()}`,
+    valueFormatter: (value: number) => {
+      if (value == null) return "";
+      return `$${value.toLocaleString()}`;
+    },
   },
   { field: "created_at", headerName: "Date", width: 200 },
 ];
