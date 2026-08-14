@@ -22,3 +22,16 @@ export interface Order {
   shipping_address?: ShippingAddress | null;
   created_at: string;
 }
+
+export interface OrderFilters {
+  page: number;
+  pageSize: number;
+  search?: string;
+  status?: OrderStatus[];
+  minAmount?: number;
+  maxAmount?: number;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
