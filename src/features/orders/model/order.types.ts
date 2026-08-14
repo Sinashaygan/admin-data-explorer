@@ -4,10 +4,18 @@ export type OrderStatus =
   | "shipped"
   | "delivered"
   | "cancelled";
+
+export type OrderSortField =
+  | "created_at"
+  | "total_amount"
+  | "status"
+  | "customer_name"
+  | "order_number";
+
 export interface ShippingAddress {
   city: string;
-  province: string;
-  postal_code: string;
+  province?: string;
+  postal_code?: string;
   address: string;
 }
 
@@ -19,19 +27,17 @@ export interface Order {
   status: OrderStatus;
   total_amount: number;
   items_count: number;
-  shipping_address?: ShippingAddress | null;
+  shipping_address: ShippingAddress | null;
   created_at: string;
 }
 
 export interface OrderFilters {
   page: number;
   pageSize: number;
-  search?: string;
-  status?: OrderStatus[];
-  minAmount?: number;
-  maxAmount?: number;
+  search: string;
+  status: OrderStatus[];
   startDate?: string;
   endDate?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  sortBy: OrderSortField;
+  sortOrder: "asc" | "desc";
 }
