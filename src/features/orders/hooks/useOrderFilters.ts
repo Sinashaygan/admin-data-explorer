@@ -12,8 +12,7 @@ export function useOrderFilters() {
     () => orderFiltersFromSearchParams(searchParams),
     [searchParams],
   );
-
-  //
+  
   const setFilters = useCallback(
     (newFilters: Partial<OrderFilters>) => {
       const updatedFilters = { ...filters, ...newFilters };
