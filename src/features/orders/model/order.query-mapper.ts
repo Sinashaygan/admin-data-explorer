@@ -14,3 +14,10 @@ export function toOrdersDatabaseQuery(
     ascending: filters.sortOrder === "asc",
   };
 }
+
+export function getNextUtcDate(date: string): string {
+  const value = new Date(`${date}T00:00:00.000Z`);
+  value.setUTCDate(value.getUTCDate() + 1);
+
+  return value.toISOString();
+}
