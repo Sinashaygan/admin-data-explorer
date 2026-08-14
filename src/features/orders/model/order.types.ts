@@ -41,3 +41,19 @@ export interface OrderFilters {
   sortBy: OrderSortField;
   sortOrder: "asc" | "desc";
 }
+
+export interface OrdersPage {
+  rows: Order[];
+  total: number;
+}
+
+export interface OrdersDatabaseQuery {
+  offset: number;
+  limit: number;
+  search?: string;
+  statuses?: OrderStatus[];
+  startDate?: string;
+  endDate?: string;
+  sortBy: OrderSortField;
+  ascending: boolean;
+}
