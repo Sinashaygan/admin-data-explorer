@@ -13,4 +13,20 @@ const dateSchema = z
   .optional()
   .catch(undefined);
 
+const statusArraySchema = z.preprocess(
+  (value) => {
+    if (Array.isArray(value)) {
+      return value.flatMap((item) =>
+        typeof item === "string" ? item.split(",") : [],
+      );
+    }
+
+    if (typeof value === "string") {
+      return value.split(",");
+    }
+
+    return [];
+  },
+  z.array(z.enum(ORDER_STATUSES)).catch([]),
+);
 
