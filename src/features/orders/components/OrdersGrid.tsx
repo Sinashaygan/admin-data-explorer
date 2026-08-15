@@ -2,6 +2,7 @@
 "use client";
 
 import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
+import { useMemo } from "react";
 import { useOrders } from "../hooks/useOrders";
 import { OrderSortField } from "../model/order.types";
 
@@ -24,17 +25,35 @@ const columns: GridColDef[] = [
 
 export function OrdersGrid() {
   const { data, isLoading, isError, filters, setFilters } = useOrders();
+  const paginationModel = useMemo(
+    () => ({ page: filters.page, pageSize: filters.pageSize }),
+    [filters.page, filters.pageSize],
+  );
+  const sortModel = useMemo(
+    () => [{ field: filters.sortBy, sort: filters.sortOrder }] as GridSortModel,
+    [filters.sortBy, filters.sortOrder],
+  );
 
   // تبدیل Sorting مدل MUI به مدل ما
   const handleSortModelChange = (model: GridSortModel) => {
-    if (model.length > 0) {
-      setFilters({
-        sortBy: model[0].field as OrderSortField,
-        sortOrder: model[0].sort as "asc" | "desc",
-      });
-    } else {
-      setFilters({ sortBy: "created_at", sortOrder: "desc" });
+    const nextSortBy =
+      model[0]?.field != null
+        ? (model[0].field as OrderSortField)
+        : "created_at";
+    const nextSortOrder =
+      model[0]?.sort != null ? model[0].sort : "desc";
+
+    const hasChanged =
+      nextSortBy !== filters.sortBy || nextSortOrder !== filters.sortOrder;
+
+    if (!hasChanged) {
+      return;
     }
+
+    setFilters({
+      sortBy: nextSortBy,
+      sortOrder: nextSortOrder,
+    });
   };
 
   return (
@@ -46,14 +65,21 @@ export function OrdersGrid() {
         columns={columns}
         // Pagination
         paginationMode="server"
-        paginationModel={{ page: filters.page, pageSize: filters.pageSize }}
-        onPaginationModelChange={(model) =>
-          setFilters({ page: model.page, pageSize: model.pageSize })
-        }
+        paginationModel={paginationModel}
+        onPaginationModelChange={(model) => {
+          const hasChanged =
+            model.page !== filters.page || model.pageSize !== filters.pageSize;
+
+          if (!hasChanged) {
+            return;
+          }
+
+          setFilters({ page: model.page, pageSize: model.pageSize });
+        }}
         pageSizeOptions={[25, 50, 100]}
         // Sorting
         sortingMode="server"
-        sortModel={[{ field: filters.sortBy, sort: filters.sortOrder }]}
+        sortModel={sortModel}
         onSortModelChange={handleSortModelChange}
         // UX
         disableRowSelectionOnClick
