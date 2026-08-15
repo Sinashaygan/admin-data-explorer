@@ -1,4 +1,4 @@
-import type { OrderSortField, OrderStatus } from "./order.types";
+import type { OrderFilters, OrderSortField, OrderStatus } from "./order.types";
 
 export const ORDER_STATUSES = [
   "pending",
@@ -17,3 +17,10 @@ export const ORDER_SORT_FIELDS = [
   "customer_name",
   "order_number",
 ] as const satisfies readonly OrderSortField[];
+
+export const PAGE_RESET_FILTER_KEYS: ReadonlyArray<keyof OrderFilters> = [
+  "search",
+  "status",
+  "startDate",
+  "endDate",
+];
