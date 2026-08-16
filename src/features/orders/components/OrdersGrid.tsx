@@ -14,6 +14,8 @@ import { OrderSortField, OrderStatus } from "../model/order.types";
 import { Chip, Tooltip, IconButton } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { CustomGridToolbar } from "./GridToolbar";
+import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
 
 const ORDER_STATUS_COLORS: Record<
   OrderStatus,
@@ -145,6 +147,14 @@ export function OrdersGrid() {
         sortingMode="server"
         sortModel={sortModel}
         onSortModelChange={handleSortModelChange}
+        
+        // Custom Slots
+        slots={{
+          toolbar:CustomGridToolbar,
+          loadingOverlay: CustomLoadingOverlay,
+          noResultsOverlay:CustomNoRowsOverlay
+        }}
+
         // UX
         disableRowSelectionOnClick
       />
