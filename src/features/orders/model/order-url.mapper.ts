@@ -10,7 +10,7 @@ interface SearchParamsReader {
 export function orderFiltersFromSearchParams(
   searchParams: SearchParamsReader,
 ): OrderFilters {
-  return orderQueryParamsSchema.parse({
+  const result =  orderQueryParamsSchema.safeParse({
     page: searchParams.get("page") ?? undefined,
     pageSize: searchParams.get("pageSize") ?? undefined,
     search: searchParams.get("q") ?? undefined,
@@ -20,6 +20,12 @@ export function orderFiltersFromSearchParams(
     sortBy: searchParams.get("sortBy") ?? undefined,
     sortOrder: searchParams.get("sortOrder") ?? undefined,
   });
+
+  if (!result.success) {
+    return DEFAULT_ORDER_FILTERS;
+  }
+
+  return result.data;
 }
 
 export function orderFiltersToSearchParams(
