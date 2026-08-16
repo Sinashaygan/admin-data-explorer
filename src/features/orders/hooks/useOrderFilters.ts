@@ -5,6 +5,7 @@ import {
 } from "../model/order-url.mapper";
 import { useCallback, useMemo } from "react";
 import { OrderFilters } from "../model/order.types";
+import { DEFAULT_ORDER_FILTERS } from "../model/order.defaults";
 // import { PAGE_RESET_FILTER_KEYS } from "../model/order.constants";
 
 type SetFiltersOptions = {
@@ -57,5 +58,12 @@ export function useOrderFilters() {
     [filters, pathname, router, searchParams],
   );
 
-  return { filters, setFilters };
+  const resetFilters = useCallback(() => {
+    const queryString = orderFiltersToSearchParams(DEFAULT_ORDER_FILTERS);
+
+    const href = queryString ? `${pathname}?${queryString}` : pathname;
+    router.replace(href, { scroll: false });
+  }, [filters.page, pathname, router]);
+
+  return { filters, setFilters, resetFilters };
 }
