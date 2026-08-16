@@ -6,7 +6,7 @@ import {
 import { useCallback, useMemo } from "react";
 import { OrderFilters } from "../model/order.types";
 import { DEFAULT_ORDER_FILTERS } from "../model/order.defaults";
-// import { PAGE_RESET_FILTER_KEYS } from "../model/order.constants";
+import { PAGE_RESET_FILTER_KEYS } from "../model/order.constants";
 
 type SetFiltersOptions = {
   resetPage?: boolean;
@@ -26,7 +26,7 @@ export function useOrderFilters() {
 
   const setFilters = useCallback(
     (newFilters: Partial<OrderFilters>, options: SetFiltersOptions = {}) => {
-      const { resetPage = true, replace = true } = options;
+      const { resetPage, replace = true } = options;
 
       if (Object.keys(newFilters).length === 0) {
         return;
@@ -34,9 +34,15 @@ export function useOrderFilters() {
 
       const updatedFilters = { ...filters, ...newFilters };
 
-      //   const shouldResetPage = PAGE_RESET_FILTER_KEYS.some((key) => key in newFilters);
+      const hasExplicitPageUpdate = "page" in newFilters;
+      const changesAffectResultSet =
+        PAGE_RESET_FILTER_KEYS.some((key) => key in newFilters) ||
+        "sortBy" in newFilters ||
+        "sortOrder" in newFilters;
+      const shouldResetPage =
+        resetPage ?? (!hasExplicitPageUpdate && changesAffectResultSet);
 
-      if (resetPage) {
+      if (shouldResetPage) {
         updatedFilters.page = 0;
       }
 
