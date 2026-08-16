@@ -22,4 +22,13 @@ export function OrdersFilters() {
         search: debouncedSearch,
       });
     }, [debouncedSearch, filters.search, setFilters]);
+
+    const handleDateChange = (
+      field: "startDate" | "endDate",
+      value: string,
+    ) => {
+      setFilters({
+        [field]: value || undefined,
+      });
+    };
 }
