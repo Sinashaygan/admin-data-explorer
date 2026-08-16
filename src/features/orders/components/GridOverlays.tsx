@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 export function CustomLoadingOverlay() {
     <Box
@@ -12,5 +12,10 @@ export function CustomLoadingOverlay() {
         backgroundColor: "rgba(255, 255, 255, 0.6)",
         zIndex: 1,
       }}
-    ></Box>;
+    >
+        <CircularProgress size={40} thickness={4}/>
+        <Typography variant="body2" color="textSecondary">
+            Loading Orders...
+        </Typography>
+    </Box>;
 }
