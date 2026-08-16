@@ -11,6 +11,9 @@ import {
 import { useMemo, useState } from "react";
 import { useOrders } from "../hooks/useOrders";
 import { OrderSortField, OrderStatus } from "../model/order.types";
+import { Chip, Tooltip, IconButton } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const ORDER_STATUS_COLORS: Record<
   OrderStatus,
@@ -28,9 +31,29 @@ export function OrdersGrid() {
   const [columnVisibility , setColumnVisibility] = useState<GridColumnVisibilityModel>({});
 
   const columns: GridColDef[] = [
-    { field: "order_number", headerName: "Order ID", width: 120 },
-    { field: "customer_name", headerName: "Customer", flex: 1 },
-    { field: "status", headerName: "Status", width: 130 },
+    {
+      field: "order_number",
+      headerName: "Order ID",
+      width: 120,
+      sortable: true,
+    },
+    { field: "customer_name", headerName: "Customer", flex: 1, minWidth: 180 },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 140,
+      renderCell: (params) => {
+        const status = params.value as OrderStatus;
+        return (
+          <Chip
+            label={status.toUpperCase()}
+            color={ORDER_STATUS_COLORS[status] || "default"}
+            size="small"
+            sx={{ fontWeight: "bold", textTransform: "capitalize" }}
+          />
+        );
+      },
+    },
     {
       field: "total_amount",
       headerName: "Amount",
@@ -42,6 +65,24 @@ export function OrdersGrid() {
       },
     },
     { field: "created_at", headerName: "Date", width: 200 },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      getActions: (params) => [
+        <Tooltip title="View Details" key="view">
+          <IconButton onClick={() => console.log("View Order:", params.id)}>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>,
+        <Tooltip title="More Actions" key="more">
+          <IconButton onClick={() => console.log("More Actions:", params.id)}>
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>,
+      ],
+    },
   ]; 
 
   const paginationModel = useMemo(
