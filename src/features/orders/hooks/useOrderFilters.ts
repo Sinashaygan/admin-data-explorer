@@ -4,7 +4,10 @@ import { useCallback, useMemo } from "react";
 import { OrderFilters } from "../model/order.types";
 import { PAGE_RESET_FILTER_KEYS } from "../model/order.constants";
 
-
+type SetFiltersOptions = {
+  resetPage?: boolean;
+  replace?: boolean;
+};
 
 export function useOrderFilters() {
   const pathname = usePathname();
@@ -18,7 +21,7 @@ export function useOrderFilters() {
   );
   
   const setFilters = useCallback(
-    (newFilters: Partial<OrderFilters>) => {
+    (newFilters: Partial<OrderFilters>, options: SetFiltersOptions = {},) => {
       if (Object.keys(newFilters).length === 0) {
         return;
       }
