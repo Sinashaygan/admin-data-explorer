@@ -4,7 +4,18 @@
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { useOrders } from "../hooks/useOrders";
-import { OrderSortField } from "../model/order.types";
+import { OrderSortField, OrderStatus } from "../model/order.types";
+
+const ORDER_STATUS_COLORS: Record<
+  OrderStatus,
+  "default" | "primary" | "secondary" | "error" | "info" | "success"
+> = {
+  pending: "warning" as any, 
+  processing: "info",
+  shipped: "primary",
+  delivered: "success",
+  cancelled: "error",
+};
 
 const columns: GridColDef[] = [
   { field: "order_number", headerName: "Order ID", width: 120 },
