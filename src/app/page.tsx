@@ -5,6 +5,7 @@ import { OrdersFilters } from "../features/orders/components/OrdersFilters";
 import { QueryClient } from "@tanstack/react-query";
 import { orderFiltersFromSearchParams } from "../features/orders/model/order-url.mapper";
 import { toOrdersDatabaseQuery } from "../features/orders/model/order.query-mapper";
+import { getOrders } from "../features/orders/api/orders.repository";
 
 export const metadata = {
   title: "Orders Management | Admin Dashboard",
@@ -33,6 +34,11 @@ export default async function OrderPage({ searchParams }: OrderPagePops) {
 
    const filters = orderFiltersFromSearchParams(paramsAdapter);
    const dbQuery = toOrdersDatabaseQuery(filters);
+
+   await queryClient.prefetchQuery({
+     queryKey: ["orders", filters],
+     queryFn: () => getOrders(dbQuery),
+   });
 
   return (
     <Stack spacing={2}>
