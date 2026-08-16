@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { useOrderFilters } from "../hooks/useOrderFilters";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { OrderStatus } from "../model/order.types";
-import { Stack, TextField } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  Stack,
+  TextField,
+} from "@mui/material";
 import { GridSearchIcon } from "@mui/x-data-grid";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -34,6 +40,12 @@ export function OrdersFilters() {
     });
   }, [debouncedSearch, filters.search, setFilters]);
 
+  const handleStatusChange = (value: OrderStatus[]) => {
+    setFilters({
+      status: value,
+    });
+  };
+
   const handleDateChange = (field: "startDate" | "endDate", value: string) => {
     setFilters({
       [field]: value || undefined,
@@ -63,11 +75,32 @@ export function OrdersFilters() {
         size="small"
         fullWidth
         slotProps={{
-            input:{
-                startAdornment:<GridSearchIcon/>
-            }
+          input: {
+            startAdornment: <GridSearchIcon />,
+          },
         }}
       />
+
+      <FormControl
+        size="small"
+        sx={{
+          minWidth: {
+            xs: "100%",
+            md: 220,
+          },
+        }}
+      >
+        <InputLabel id="order-status-filter-label">Status</InputLabel>
+        <Select
+          labelId="order-status-filter-label"
+          multiple
+          value={filters.status}
+          onChange={(e) => {
+            const value = e.target.value;
+            handleStatusChange(typeof value === "string" ? value.split(",") as OrderStatus[] : value as OrderStatus[]);
+          }}
+        ></Select>
+      </FormControl>
     </Stack>
   );
 }
