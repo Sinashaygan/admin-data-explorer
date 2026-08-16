@@ -1,8 +1,11 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { orderFiltersFromSearchParams, orderFiltersToSearchParams } from "../model/order-url.mapper";
+import {
+  orderFiltersFromSearchParams,
+  orderFiltersToSearchParams,
+} from "../model/order-url.mapper";
 import { useCallback, useMemo } from "react";
 import { OrderFilters } from "../model/order.types";
-import { PAGE_RESET_FILTER_KEYS } from "../model/order.constants";
+// import { PAGE_RESET_FILTER_KEYS } from "../model/order.constants";
 
 type SetFiltersOptions = {
   resetPage?: boolean;
@@ -19,18 +22,20 @@ export function useOrderFilters() {
     () => orderFiltersFromSearchParams(searchParams),
     [searchParams],
   );
-  
+
   const setFilters = useCallback(
-    (newFilters: Partial<OrderFilters>, options: SetFiltersOptions = {},) => {
+    (newFilters: Partial<OrderFilters>, options: SetFiltersOptions = {}) => {
+      const { resetPage = true, replace = true } = options;
+
       if (Object.keys(newFilters).length === 0) {
         return;
       }
 
       const updatedFilters = { ...filters, ...newFilters };
 
-      const shouldResetPage = PAGE_RESET_FILTER_KEYS.some((key) => key in newFilters);
+      //   const shouldResetPage = PAGE_RESET_FILTER_KEYS.some((key) => key in newFilters);
 
-      if (shouldResetPage) {
+      if (resetPage) {
         updatedFilters.page = 0;
       }
 
@@ -42,7 +47,12 @@ export function useOrderFilters() {
       }
 
       const href = queryString ? `${pathname}?${queryString}` : pathname;
-      router.replace(href, { scroll: false });
+      //   router.replace(href, { scroll: false });
+      if (replace) {
+        router.replace(href, { scroll: false });
+      } else {
+        router.push(href, { scroll: false });
+      }
     },
     [filters, pathname, router, searchParams],
   );
