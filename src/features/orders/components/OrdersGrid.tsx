@@ -1,7 +1,7 @@
 // src/features/orders/components/OrdersGrid.tsx
 "use client";
 
-import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { useOrders } from "../hooks/useOrders";
 import { OrderSortField } from "../model/order.types";
@@ -55,7 +55,7 @@ export function OrdersGrid() {
     });
   };
 
-  const handlePaginationModelChange = (model) => {
+  const handlePaginationModelChange = (model:GridPaginationModel) => {
     const hasChanged =
       model.page !== filters.page || model.pageSize !== filters.pageSize;
 
@@ -63,7 +63,10 @@ export function OrdersGrid() {
       return;
     }
 
-    setFilters({ page: model.page, pageSize: model.pageSize });
+    setFilters(
+      { page: model.page, pageSize: model.pageSize },
+      { resetPage: false },
+    );
   };
 
   return (
