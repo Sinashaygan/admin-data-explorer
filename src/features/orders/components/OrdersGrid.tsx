@@ -139,24 +139,40 @@ export function OrdersGrid() {
         loading={isLoading}
         columns={columns}
         // Pagination
+
         paginationMode="server"
         paginationModel={paginationModel}
         onPaginationModelChange={handlePaginationModelChange}
         pageSizeOptions={[25, 50, 100]}
         // Sorting
+
         sortingMode="server"
         sortModel={sortModel}
         onSortModelChange={handleSortModelChange}
-        
+        //Column Visibility
+        columnVisibilityModel={columnVisibility}
+        onColumnVisibilityModelChange={(newModel) =>
+          setColumnVisibility(newModel)
+        }
         // Custom Slots
         slots={{
-          toolbar:CustomGridToolbar,
+          toolbar: CustomGridToolbar,
           loadingOverlay: CustomLoadingOverlay,
-          noResultsOverlay:CustomNoRowsOverlay
+          noResultsOverlay: CustomNoRowsOverlay,
         }}
-
         // UX
         disableRowSelectionOnClick
+        autoHeight={false}
+        sx={{
+          boxShadow: 2,
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 2,
+          backgroundColor: "background.paper",
+          "& .MuiDataGrid-cell:focus": {
+            outline: "none",
+          },
+        }}
       />
     </div>
   );
