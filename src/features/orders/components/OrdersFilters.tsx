@@ -5,11 +5,14 @@ import { OrderStatus } from "../model/order.types";
 import {
   FormControl,
   InputLabel,
+  MenuItem,
+  OutlinedInput,
   Select,
   Stack,
   TextField,
 } from "@mui/material";
 import { GridSearchIcon } from "@mui/x-data-grid";
+import { ORDER_STATUSES } from "../model/order.constants";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
@@ -97,9 +100,23 @@ export function OrdersFilters() {
           value={filters.status}
           onChange={(e) => {
             const value = e.target.value;
-            handleStatusChange(typeof value === "string" ? value.split(",") as OrderStatus[] : value as OrderStatus[]);
+            handleStatusChange(
+              typeof value === "string"
+                ? (value.split(",") as OrderStatus[])
+                : (value as OrderStatus[]),
+            );
           }}
-        ></Select>
+          input={<OutlinedInput label="Status" />}
+          renderValue={(selected) =>
+            (selected as OrderStatus[])
+              .map((status) => STATUS_LABELS[status])
+              .join(", ")
+          }
+        >
+          {ORDER_STATUSES.map((status)=>(
+            <MenuItem key={status} value={status}>{STATUS_LABELS[status]}</MenuItem>
+          ))}
+        </Select>
       </FormControl>
     </Stack>
   );
