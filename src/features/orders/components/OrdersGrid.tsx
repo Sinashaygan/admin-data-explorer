@@ -1,34 +1,97 @@
 // src/features/orders/components/OrdersGrid.tsx
 "use client";
 
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
-import { useMemo } from "react";
+import {
+  DataGrid,
+  GridColDef,
+  GridColumnVisibilityModel,
+  GridPaginationModel,
+  GridSortModel,
+} from "@mui/x-data-grid";
+import { useMemo, useState } from "react";
 import { useOrders } from "../hooks/useOrders";
-import { OrderSortField } from "../model/order.types";
+import { OrderSortField, OrderStatus } from "../model/order.types";
+import { Chip, Tooltip, IconButton, ChipProps } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { CustomGridToolbar } from "./GridToolbar";
+import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
 
-const columns: GridColDef[] = [
-  { field: "order_number", headerName: "Order ID", width: 120 },
-  { field: "customer_name", headerName: "Customer", flex: 1 },
-  { field: "status", headerName: "Status", width: 130 },
-  {
-    field: "total_amount",
-    headerName: "Amount",
-    type: "number",
-    width: 120,
-    valueFormatter: (value: number) => {
-      if (value == null) return "";
-      return `$${value.toLocaleString()}`;
-    },
-  },
-  { field: "created_at", headerName: "Date", width: 200 },
-];
+const ORDER_STATUS_COLORS: Record<
+  OrderStatus,
+  ChipProps["color"]
+> = {
+  pending: "warning",
+  processing: "info",
+  shipped: "primary",
+  delivered: "success",
+  cancelled: "error",
+};
 
 export function OrdersGrid() {
-  const { data, isLoading, isError, filters, setFilters } = useOrders();
+  const { data, isLoading, filters, setFilters } = useOrders();
+  const [columnVisibility , setColumnVisibility] = useState<GridColumnVisibilityModel>({});
+
+  const columns: GridColDef[] = [
+    {
+      field: "order_number",
+      headerName: "Order ID",
+      width: 120,
+      sortable: true,
+    },
+    { field: "customer_name", headerName: "Customer", flex: 1, minWidth: 180 },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 140,
+      renderCell: (params) => {
+        const status = params.value as OrderStatus;
+        return (
+          <Chip
+            label={status.toUpperCase()}
+            color={ORDER_STATUS_COLORS[status] || "default"}
+            size="small"
+            sx={{ fontWeight: "bold", textTransform: "capitalize" }}
+          />
+        );
+      },
+    },
+    {
+      field: "total_amount",
+      headerName: "Amount",
+      type: "number",
+      width: 120,
+      valueFormatter: (value: number) => {
+        if (value == null) return "";
+        return `$${value.toLocaleString()}`;
+      },
+    },
+    { field: "created_at", headerName: "Date", width: 200 },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      getActions: (params) => [
+        <Tooltip title="View Details" key="view">
+          <IconButton onClick={() => console.log("View Order:", params.id)}>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>,
+        <Tooltip title="More Actions" key="more">
+          <IconButton onClick={() => console.log("More Actions:", params.id)}>
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>,
+      ],
+    },
+  ]; 
+
   const paginationModel = useMemo(
     () => ({ page: filters.page, pageSize: filters.pageSize }),
     [filters.page, filters.pageSize],
   );
+
   const sortModel = useMemo(
     () => [{ field: filters.sortBy, sort: filters.sortOrder }] as GridSortModel,
     [filters.sortBy, filters.sortOrder],
@@ -39,8 +102,7 @@ export function OrdersGrid() {
       model[0]?.field != null
         ? (model[0].field as OrderSortField)
         : "created_at";
-    const nextSortOrder =
-      model[0]?.sort != null ? model[0].sort : "desc";
+    const nextSortOrder = model[0]?.sort != null ? model[0].sort : "desc";
 
     const hasChanged =
       nextSortBy !== filters.sortBy || nextSortOrder !== filters.sortOrder;
@@ -55,7 +117,7 @@ export function OrdersGrid() {
     });
   };
 
-  const handlePaginationModelChange = (model:GridPaginationModel) => {
+  const handlePaginationModelChange = (model: GridPaginationModel) => {
     const hasChanged =
       model.page !== filters.page || model.pageSize !== filters.pageSize;
 
@@ -77,16 +139,40 @@ export function OrdersGrid() {
         loading={isLoading}
         columns={columns}
         // Pagination
+
         paginationMode="server"
         paginationModel={paginationModel}
         onPaginationModelChange={handlePaginationModelChange}
         pageSizeOptions={[25, 50, 100]}
         // Sorting
+
         sortingMode="server"
         sortModel={sortModel}
         onSortModelChange={handleSortModelChange}
+        //Column Visibility
+        columnVisibilityModel={columnVisibility}
+        onColumnVisibilityModelChange={(newModel) =>
+          setColumnVisibility(newModel)
+        }
+        // Custom Slots
+        slots={{
+          toolbar: CustomGridToolbar,
+          loadingOverlay: CustomLoadingOverlay,
+          noResultsOverlay: CustomNoRowsOverlay,
+        }}
         // UX
         disableRowSelectionOnClick
+        autoHeight={false}
+        sx={{
+          boxShadow: 2,
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 2,
+          backgroundColor: "background.paper",
+          "& .MuiDataGrid-cell:focus": {
+            outline: "none",
+          },
+        }}
       />
     </div>
   );
