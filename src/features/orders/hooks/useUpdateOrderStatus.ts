@@ -24,5 +24,32 @@ export function useUpdateOrderStatus() {
     MutationContext
   >({
     mutationFn: ({ orderId, status }) => patchOrderStatus(orderId, status),
+    onMutate: async ({ orderId, status }) => {
+      await queryClient.cancelQueries({
+        queryKey: ["orders"],
+      });
+
+      const previousQueries = queryClient.getQueriesData<OrdersQueryData>({
+        queryKey: ["orders"],
+      });
+
+      queryClient.setQueriesData<OrdersQueryData>(
+        { queryKey: ["orders"] },
+        (currentData) => {
+          if (!currentData) {
+            return currentData;
+          }
+
+          return {
+            ...currentData,
+            rows: currentData.rows.map((order) =>
+              order.id === orderId ? { ...order, status } : order,
+            ),
+          };
+        },
+      );
+
+      return { previousQueries };
+    },
   });
 }
