@@ -24,6 +24,7 @@ export function useUpdateOrderStatus() {
     MutationContext
   >({
     mutationFn: ({ orderId, status }) => patchOrderStatus(orderId, status),
+
     onMutate: async ({ orderId, status }) => {
       await queryClient.cancelQueries({
         queryKey: ["orders"],
@@ -50,6 +51,23 @@ export function useUpdateOrderStatus() {
       );
 
       return { previousQueries };
+    },
+    
+    onError: (_error, _variables, context) => {
+      context?.previousQueries.forEach(
+        ([queryKey, previousData]) => {
+          queryClient.setQueryData(
+            queryKey,
+            previousData,
+          );
+        },
+      );
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      });
     },
   });
 }
