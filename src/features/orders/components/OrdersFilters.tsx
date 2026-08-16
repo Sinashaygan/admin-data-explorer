@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useOrderFilters } from "../hooks/useOrderFilters";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import { OrderStatus } from "../model/order.types";
 import {
+  Box,
+  Button,
   FormControl,
   InputLabel,
   MenuItem,
@@ -11,8 +10,12 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { GridSearchIcon } from "@mui/x-data-grid";
+import { useOrderFilters } from "../hooks/useOrderFilters";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { OrderStatus } from "../model/order.types";
 import { ORDER_STATUSES } from "../model/order.constants";
+import { GridSearchIcon } from "@mui/x-data-grid";
+import { GridClearIcon } from "@mui/x-data-grid";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
@@ -79,7 +82,7 @@ export function OrdersFilters() {
         fullWidth
         slotProps={{
           input: {
-            startAdornment: <GridSearchIcon />,
+            startAdornment: <GridSearchIcon fontSize="small" />,
           },
         }}
       />
@@ -94,6 +97,7 @@ export function OrdersFilters() {
         }}
       >
         <InputLabel id="order-status-filter-label">Status</InputLabel>
+
         <Select
           labelId="order-status-filter-label"
           multiple
@@ -113,11 +117,62 @@ export function OrdersFilters() {
               .join(", ")
           }
         >
-          {ORDER_STATUSES.map((status)=>(
-            <MenuItem key={status} value={status}>{STATUS_LABELS[status]}</MenuItem>
+          {ORDER_STATUSES.map((status) => (
+            <MenuItem key={status} value={status}>
+              {STATUS_LABELS[status]}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
+
+      <TextField
+        label="From"
+        type="date"
+        size="small"
+        value={filters.startDate ?? ""}
+        onChange={(event) => {
+          handleDateChange("startDate", event.target.value);
+        }}
+        slotProps={{
+          inputLabel: {
+            shrink: true,
+          },
+        }}
+      />
+
+      <TextField
+        label="To"
+        type="date"
+        size="small"
+        value={filters.endDate ?? ""}
+        onChange={(event) => {
+          handleDateChange("endDate", event.target.value);
+        }}
+        slotProps={{
+          inputLabel: {
+            shrink: true,
+          },
+        }}
+      />
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: {
+            xs: "flex-start",
+            md: "center",
+          },
+        }}
+      >
+        <Button
+          color="inherit"
+          startIcon={<GridClearIcon />}
+          disabled={!hasActiveFilters}
+          onClick={resetFilters}
+        >
+          Reset
+        </Button>
+      </Box>
     </Stack>
   );
 }
