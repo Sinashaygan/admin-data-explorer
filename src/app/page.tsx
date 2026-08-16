@@ -1,8 +1,8 @@
-import { Stack, Typography } from "@mui/material";
+import { Stack, Typography, Container, Box, } from "@mui/material";
 
 import { OrdersGrid } from "../features/orders/components/OrdersGrid";
 import { OrdersFilters } from "../features/orders/components/OrdersFilters";
-import { QueryClient } from "@tanstack/react-query";
+import {HydrationBoundary, dehydrate, QueryClient } from "@tanstack/react-query";
 import { orderFiltersFromSearchParams } from "../features/orders/model/order-url.mapper";
 import { toOrdersDatabaseQuery } from "../features/orders/model/order.query-mapper";
 import { getOrders } from "../features/orders/api/orders.repository";
@@ -41,12 +41,22 @@ export default async function OrderPage({ searchParams }: OrderPagePops) {
    });
 
   return (
-    <Stack spacing={2}>
-      <Typography variant="h5">Orders</Typography>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Stack spacing={3}>
+        <Box>
+          <Typography variant="h4" sx={{fontWeight:700}}>
+            Order Explorer
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage and monitor all incoming orders in real-time.
+          </Typography>
+        </Box>
 
-      <OrdersFilters />
-
-      <OrdersGrid />
-    </Stack>
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <OrdersFilters />
+          <OrdersGrid />
+        </HydrationBoundary>
+      </Stack>
+    </Container>
   );
 }
