@@ -1,7 +1,7 @@
 // src/features/orders/components/OrdersGrid.tsx
 "use client";
 
-import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { useOrders } from "../hooks/useOrders";
 import { OrderSortField } from "../model/order.types";
@@ -34,7 +34,6 @@ export function OrdersGrid() {
     [filters.sortBy, filters.sortOrder],
   );
 
-  // تبدیل Sorting مدل MUI به مدل ما
   const handleSortModelChange = (model: GridSortModel) => {
     const nextSortBy =
       model[0]?.field != null
@@ -56,6 +55,20 @@ export function OrdersGrid() {
     });
   };
 
+  const handlePaginationModelChange = (model:GridPaginationModel) => {
+    const hasChanged =
+      model.page !== filters.page || model.pageSize !== filters.pageSize;
+
+    if (!hasChanged) {
+      return;
+    }
+
+    setFilters(
+      { page: model.page, pageSize: model.pageSize },
+      { resetPage: false },
+    );
+  };
+
   return (
     <div style={{ height: 600, width: "100%" }}>
       <DataGrid
@@ -66,16 +79,7 @@ export function OrdersGrid() {
         // Pagination
         paginationMode="server"
         paginationModel={paginationModel}
-        onPaginationModelChange={(model) => {
-          const hasChanged =
-            model.page !== filters.page || model.pageSize !== filters.pageSize;
-
-          if (!hasChanged) {
-            return;
-          }
-
-          setFilters({ page: model.page, pageSize: model.pageSize });
-        }}
+        onPaginationModelChange={handlePaginationModelChange}
         pageSizeOptions={[25, 50, 100]}
         // Sorting
         sortingMode="server"
