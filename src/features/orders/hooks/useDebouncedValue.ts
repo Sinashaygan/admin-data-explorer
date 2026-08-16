@@ -7,6 +7,8 @@ export function useDebouncedValue<T>(value:T , delay=400){
         const timeoutId = window.setTimeout(()=>{
             setDebounceValue(value)
         }, delay)
+
+        return ()=>{window.clearInterval(timeoutId)}
     },[value , delay])
 
     return debouncedValue
