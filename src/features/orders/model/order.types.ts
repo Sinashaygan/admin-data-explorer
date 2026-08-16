@@ -57,3 +57,8 @@ export interface OrdersDatabaseQuery {
   sortBy: OrderSortField;
   ascending: boolean;
 }
+
+export interface UpdateOrderStatusInput {
+  orderId: string;
+  status: OrderStatus;
+}
