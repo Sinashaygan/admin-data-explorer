@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { useOrderFilters } from "../hooks/useOrderFilters";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { OrderStatus } from "../model/order.types";
+
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  pending: "Pending",
+  processing: "Processing",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
 
 export function OrdersFilters() {
     const {filters , resetFilters , setFilters} = useOrderFilters()
@@ -31,4 +40,10 @@ export function OrdersFilters() {
         [field]: value || undefined,
       });
     };
+
+    const hasActiveFilters =
+      Boolean(filters.search) ||
+      filters.status.length > 0 ||
+      Boolean(filters.startDate) ||
+      Boolean(filters.endDate);
 }
