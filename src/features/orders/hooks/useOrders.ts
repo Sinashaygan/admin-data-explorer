@@ -13,7 +13,7 @@ export function useOrders() {
     queryKey: ["orders", filters], 
     queryFn: () => getOrders(dbQuery),
     placeholderData: keepPreviousData, 
-    staleTime: 5000, 
+    staleTime: 60 * 1000, 
   });
 
   return {
