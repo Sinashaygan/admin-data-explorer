@@ -28,11 +28,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 
 export function OrdersFilters() {
   const { filters, resetFilters, setFilters } = useOrderFilters();
-
   const [searchInput, setSearchInput] = useState(filters.search);
-
-  const debouncedSearch = useDebouncedValue(searchInput, 450);
-
   // Track the last external search value to distinguish reset/store updates from local typing.
   const [prevSearch, setPrevSearch] = useState(filters.search);
 
@@ -40,15 +36,18 @@ export function OrdersFilters() {
     setSearchInput(filters.search);
     setPrevSearch(filters.search);
   }
+  
+  const debouncedSearch = useDebouncedValue(searchInput, 450);
 
   useEffect(() => {
     if (debouncedSearch === filters.search) {
       return;
     }
-
-    setFilters({
-      search: debouncedSearch,
-    });
+    if (debouncedSearch !== filters.search && debouncedSearch === searchInput) {
+      setFilters({
+        search: debouncedSearch,
+      });
+    }
   }, [debouncedSearch, filters.search, setFilters]);
 
   const handleStatusChange = (value: OrderStatus[]) => {
