@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order, OrderStatus } from "../model/order.types";
+import { patchOrderStatus } from "../api/orders.client";
 
 type OrdersQueryData = {
   rows: Order[];
@@ -11,15 +12,17 @@ type MutationContext = {
 };
 
 export function useUpdateOrderStatus() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation<
-      Error,
-      Order,
-      {
-        orderId: string;
-        status: OrderStatus;
-      },
-      MutationContext
-    >({});
+  return useMutation<
+    Order,
+    Error,
+    {
+      orderId: string;
+      status: OrderStatus;
+    },
+    MutationContext
+  >({
+    mutationFn: ({ orderId, status }) => patchOrderStatus(orderId, status),
+  });
 }
