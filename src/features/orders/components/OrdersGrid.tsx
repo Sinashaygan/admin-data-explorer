@@ -16,6 +16,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { CustomGridToolbar } from "./GridToolbar";
 import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
+import { GridError } from "./GridError";
 
 const ORDER_STATUS_COLORS: Record<
   OrderStatus,
@@ -29,7 +30,7 @@ const ORDER_STATUS_COLORS: Record<
 };
 
 export function OrdersGrid() {
-  const { data, isLoading, filters, setFilters } = useOrders();
+  const { data, isLoading, filters, setFilters, isError ,error , refetch} = useOrders();
   const [columnVisibility , setColumnVisibility] = useState<GridColumnVisibilityModel>({});
 
   const columns: GridColDef[] = [
@@ -130,6 +131,9 @@ export function OrdersGrid() {
       { resetPage: false },
     );
   };
+
+  if (isError) return <GridError error={error} reset={() => refetch()} />;
+
 
   return (
     <div style={{ height: 600, width: "100%" }}>
