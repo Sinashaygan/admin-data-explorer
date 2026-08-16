@@ -11,7 +11,7 @@ import {
 import { useMemo, useState } from "react";
 import { useOrders } from "../hooks/useOrders";
 import { OrderSortField, OrderStatus } from "../model/order.types";
-import { Chip, Tooltip, IconButton } from "@mui/material";
+import { Chip, Tooltip, IconButton, ChipProps } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { CustomGridToolbar } from "./GridToolbar";
@@ -19,9 +19,9 @@ import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
 
 const ORDER_STATUS_COLORS: Record<
   OrderStatus,
-  "default" | "primary" | "secondary" | "error" | "info" | "success"
+  ChipProps["color"]
 > = {
-  pending: "warning" as any,
+  pending: "warning",
   processing: "info",
   shipped: "primary",
   delivered: "success",
