@@ -1,4 +1,5 @@
 import ReactQueryProvider from "../providers/ReactQueryProvider";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter"; 
 
 export default function RootLayout({
   children,
@@ -8,7 +9,9 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <AppRouterCacheProvider>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
