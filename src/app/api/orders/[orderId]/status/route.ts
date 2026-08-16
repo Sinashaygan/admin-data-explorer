@@ -9,3 +9,11 @@ const updateStatusSchemas = z.object({
     "cancelled",
   ]),
 });
+
+type RouteContext = {
+  params: Promise<{
+    orderId: string;
+  }>;
+};
+
+export async function PATCH(request: Request, context: RouteContext) {}
