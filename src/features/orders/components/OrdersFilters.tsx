@@ -32,9 +32,13 @@ export function OrdersFilters() {
 
   const debouncedSearch = useDebouncedValue(searchInput, 450);
 
-  useEffect(() => {
+  // Track the last external search value to distinguish reset/store updates from local typing.
+  const [prevSearch, setPrevSearch] = useState(filters.search);
+
+  if (filters.search !== prevSearch) {
     setSearchInput(filters.search);
-  }, [filters.search]);
+    setPrevSearch(filters.search);
+  }
 
   useEffect(() => {
     if (debouncedSearch === filters.search) {
