@@ -36,7 +36,7 @@ export default async function OrderPage({ searchParams }: OrderPagePops) {
    const dbQuery = toOrdersDatabaseQuery(filters);
 
    await queryClient.prefetchQuery({
-     queryKey: ["orders", filters],
+     queryKey: ["orders", "list", filters],
      queryFn: () => getOrders(dbQuery),
    });
 

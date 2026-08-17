@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { OptionsObject, SnackbarKey } from "notistack";
 import { Order, OrderStatus } from "../model/order.types";
 import { patchOrderStatus } from "../api/orders.client";
 
@@ -11,7 +12,12 @@ type MutationContext = {
   previousQueries: Array<[readonly unknown[], OrdersQueryData | undefined]>;
 };
 
-export function useUpdateOrderStatus() {
+type EnqueueSnackbar = (
+  message: string,
+  options?: OptionsObject,
+) => SnackbarKey;
+
+export function useUpdateOrderStatus(enqueueSnackbar: EnqueueSnackbar) {
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -27,15 +33,15 @@ export function useUpdateOrderStatus() {
 
     onMutate: async ({ orderId, status }) => {
       await queryClient.cancelQueries({
-        queryKey: ["orders"],
+        queryKey: ["orders", "list"],
       });
 
       const previousQueries = queryClient.getQueriesData<OrdersQueryData>({
-        queryKey: ["orders"],
+        queryKey: ["orders", "list"],
       });
 
       queryClient.setQueriesData<OrdersQueryData>(
-        { queryKey: ["orders"] },
+        { queryKey: ["orders", "list"] },
         (currentData) => {
           if (!currentData) {
             return currentData;
@@ -52,21 +58,20 @@ export function useUpdateOrderStatus() {
 
       return { previousQueries };
     },
-    
-    onError: (_error, _variables, context) => {
-      context?.previousQueries.forEach(
-        ([queryKey, previousData]) => {
-          queryClient.setQueryData(
-            queryKey,
-            previousData,
-          );
-        },
-      );
+
+    onError: (error, _variables, context) => {
+      context?.previousQueries.forEach(([queryKey, previousData]) => {
+        queryClient.setQueryData(queryKey, previousData);
+      });
+
+      enqueueSnackbar(error.message, {
+        variant: "error",
+      });
     },
 
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["orders"],
+        queryKey: ["orders", "list"],
       });
     },
   });
