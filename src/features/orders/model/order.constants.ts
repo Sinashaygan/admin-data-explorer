@@ -8,6 +8,14 @@ export const ORDER_STATUSES = [
   "cancelled",
 ] as const satisfies readonly OrderStatus[];
 
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  pending: "Pending",
+  processing: "Processing",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
+
 export const ORDER_PAGE_SIZES = [25, 50, 100] as const;
 
 export const ORDER_SORT_FIELDS = [

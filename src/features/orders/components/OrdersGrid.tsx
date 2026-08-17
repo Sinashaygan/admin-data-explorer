@@ -1,22 +1,34 @@
-// src/features/orders/components/OrdersGrid.tsx
 "use client";
 
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import {
+  Chip,
+  type ChipProps,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import {
   DataGrid,
-  GridColDef,
-  GridColumnVisibilityModel,
-  GridPaginationModel,
-  GridSortModel,
+  type GridColDef,
+  type GridColumnVisibilityModel,
+  type GridPaginationModel,
+  type GridRowSelectionModel,
+  type GridSortModel,
 } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
 import { useOrders } from "../hooks/useOrders";
-import { OrderSortField, OrderStatus } from "../model/order.types";
-import { Chip, Tooltip, IconButton, ChipProps } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { CustomGridToolbar } from "./GridToolbar";
-import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
+import type {
+  Order,
+  OrderSortField,
+  OrderStatus,
+} from "../model/order.types";
 import { GridError } from "./GridError";
+import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
+import { CustomGridToolbar } from "./GridToolbar";
+import { OrdersBulkActions } from "./OrdersBulkActions";
 import { OrderStatusMenu } from "./OrderStatusMenu";
 
 const ORDER_STATUS_COLORS: Record<OrderStatus, ChipProps["color"]> = {
@@ -27,13 +39,43 @@ const ORDER_STATUS_COLORS: Record<OrderStatus, ChipProps["color"]> = {
   cancelled: "error",
 };
 
+const EMPTY_ORDERS: readonly Order[] = [];
+
+function emptySelectionModel(): GridRowSelectionModel {
+  return { type: "include", ids: new Set() };
+}
+
+type ScopedSelection = {
+  scope: string;
+  model: GridRowSelectionModel;
+};
+
 export function OrdersGrid() {
   const { data, isLoading, filters, setFilters, isError, error, refetch } =
     useOrders();
   const [columnVisibility, setColumnVisibility] =
     useState<GridColumnVisibilityModel>({});
+  const selectionScope = JSON.stringify(filters);
+  const [scopedSelection, setScopedSelection] = useState<ScopedSelection>(() => ({
+    scope: selectionScope,
+    model: emptySelectionModel(),
+  }));
+  const selectionModel =
+    scopedSelection.scope === selectionScope
+      ? scopedSelection.model
+      : emptySelectionModel();
+  const rows = data?.rows ?? EMPTY_ORDERS;
+  const selectedRows = useMemo(
+    () =>
+      rows.filter((row) =>
+        selectionModel.type === "include"
+          ? selectionModel.ids.has(row.id)
+          : !selectionModel.ids.has(row.id),
+      ),
+    [rows, selectionModel],
+  );
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef<Order>[] = [
     {
       field: "order_number",
       headerName: "Order ID",
@@ -45,40 +87,22 @@ export function OrdersGrid() {
       field: "status",
       headerName: "Status",
       width: 140,
-      renderCell: (params) => {
-        const status = params.value as OrderStatus;
-        return (
-          <Chip
-            label={status.toUpperCase()}
-            color={ORDER_STATUS_COLORS[status] || "default"}
-            size="small"
-            sx={{ fontWeight: "bold", textTransform: "capitalize" }}
-          />
-        );
-      },
+      renderCell: ({ row }) => (
+        <Chip
+          label={row.status.toUpperCase()}
+          color={ORDER_STATUS_COLORS[row.status]}
+          size="small"
+          sx={{ fontWeight: "bold", textTransform: "capitalize" }}
+        />
+      ),
     },
-    // {
-    //   field: "status",
-    //   headerName: "Status",
-    //   width: 180,
-    //   sortable: false,
-    //   renderCell: (params) => {
-    //     const orderId = String(params.row.id);
-    //     const status = params.value as OrderStatus;
-
-    //     return <OrderStatusMenu orderId={orderId} value={status} />;
-    //   },
-    // },
-
     {
       field: "total_amount",
       headerName: "Amount",
       type: "number",
       width: 120,
-      valueFormatter: (value: number) => {
-        if (value == null) return "";
-        return `$${value.toLocaleString()}`;
-      },
+      valueFormatter: (value: number | null) =>
+        value == null ? "" : `$${value.toLocaleString()}`,
     },
     { field: "created_at", headerName: "Date", width: 200 },
     {
@@ -86,24 +110,19 @@ export function OrdersGrid() {
       type: "actions",
       headerName: "Actions",
       width: 200,
-      getActions: (params) => {
-        const orderId = String(params.row.id);
-        const status = params.row.status as OrderStatus;
-
-        return [
-          <Tooltip title="View Details" key="view">
-            <IconButton onClick={() => console.log("View Order:", params.id)}>
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>,
-          <OrderStatusMenu key="status" orderId={orderId} value={status} />,
-          <Tooltip title="More Actions" key="more">
-            <IconButton onClick={() => console.log("More Actions:", params.id)}>
-              <MoreVertIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>,
-        ];
-      },
+      getActions: ({ id, row }) => [
+        <Tooltip title="View Details" key="view">
+          <IconButton onClick={() => console.log("View Order:", id)}>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>,
+        <OrderStatusMenu key="status" orderId={row.id} value={row.status} />,
+        <Tooltip title="More Actions" key="more">
+          <IconButton onClick={() => console.log("More Actions:", id)}>
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>,
+      ],
     },
   ];
 
@@ -111,40 +130,39 @@ export function OrdersGrid() {
     () => ({ page: filters.page, pageSize: filters.pageSize }),
     [filters.page, filters.pageSize],
   );
-
   const sortModel = useMemo(
     () => [{ field: filters.sortBy, sort: filters.sortOrder }] as GridSortModel,
     [filters.sortBy, filters.sortOrder],
   );
+
+  const clearSelection = () => {
+    setScopedSelection({ scope: selectionScope, model: emptySelectionModel() });
+  };
 
   const handleSortModelChange = (model: GridSortModel) => {
     const nextSortBy =
       model[0]?.field != null
         ? (model[0].field as OrderSortField)
         : "created_at";
-    const nextSortOrder = model[0]?.sort != null ? model[0].sort : "desc";
+    const nextSortOrder = model[0]?.sort ?? "desc";
 
-    const hasChanged =
-      nextSortBy !== filters.sortBy || nextSortOrder !== filters.sortOrder;
-
-    if (!hasChanged) {
+    if (
+      nextSortBy === filters.sortBy &&
+      nextSortOrder === filters.sortOrder
+    ) {
       return;
     }
 
-    setFilters({
-      sortBy: nextSortBy,
-      sortOrder: nextSortOrder,
-    });
+    clearSelection();
+    setFilters({ sortBy: nextSortBy, sortOrder: nextSortOrder });
   };
 
   const handlePaginationModelChange = (model: GridPaginationModel) => {
-    const hasChanged =
-      model.page !== filters.page || model.pageSize !== filters.pageSize;
-
-    if (!hasChanged) {
+    if (model.page === filters.page && model.pageSize === filters.pageSize) {
       return;
     }
 
+    clearSelection();
     setFilters(
       { page: model.page, pageSize: model.pageSize },
       { resetPage: false },
@@ -154,48 +172,56 @@ export function OrdersGrid() {
   if (isError) return <GridError error={error} reset={() => refetch()} />;
 
   return (
-    <div style={{ height: 600, width: "100%" }}>
-      <DataGrid
-        rows={data?.rows ?? []}
-        rowCount={data?.total ?? 0}
-        loading={isLoading}
-        columns={columns}
-        // Pagination
-
-        paginationMode="server"
-        paginationModel={paginationModel}
-        onPaginationModelChange={handlePaginationModelChange}
-        pageSizeOptions={[25, 50, 100]}
-        // Sorting
-
-        sortingMode="server"
-        sortModel={sortModel}
-        onSortModelChange={handleSortModelChange}
-        //Column Visibility
-        columnVisibilityModel={columnVisibility}
-        onColumnVisibilityModelChange={(newModel) =>
-          setColumnVisibility(newModel)
-        }
-        // Custom Slots
-        slots={{
-          toolbar: CustomGridToolbar,
-          loadingOverlay: CustomLoadingOverlay,
-          noResultsOverlay: CustomNoRowsOverlay,
-        }}
-        // UX
-        disableRowSelectionOnClick
-        autoHeight={false}
-        sx={{
-          boxShadow: 2,
-          border: 1,
-          borderColor: "divider",
-          borderRadius: 2,
-          backgroundColor: "background.paper",
-          "& .MuiDataGrid-cell:focus": {
-            outline: "none",
-          },
-        }}
+    <Stack spacing={3}>
+      <OrdersBulkActions
+        selectedRows={selectedRows}
+        onClear={clearSelection}
+        onStatusUpdateSuccess={clearSelection}
       />
-    </div>
+
+      <Typography variant="caption" color="text.secondary">
+        Row selection applies only to orders loaded on the current server-side
+        page.
+      </Typography>
+
+      <div style={{ height: 600, width: "100%" }}>
+        <DataGrid<Order>
+          checkboxSelection
+          onRowSelectionModelChange={(model) =>
+            setScopedSelection({ scope: selectionScope, model })
+          }
+          rowSelectionModel={selectionModel}
+          rows={rows}
+          getRowId={(row) => row.id}
+          rowCount={data?.total ?? 0}
+          loading={isLoading}
+          columns={columns}
+          paginationMode="server"
+          paginationModel={paginationModel}
+          onPaginationModelChange={handlePaginationModelChange}
+          pageSizeOptions={[25, 50, 100]}
+          sortingMode="server"
+          sortModel={sortModel}
+          onSortModelChange={handleSortModelChange}
+          columnVisibilityModel={columnVisibility}
+          onColumnVisibilityModelChange={setColumnVisibility}
+          slots={{
+            toolbar: CustomGridToolbar,
+            loadingOverlay: CustomLoadingOverlay,
+            noResultsOverlay: CustomNoRowsOverlay,
+          }}
+          disableRowSelectionOnClick
+          autoHeight={false}
+          sx={{
+            boxShadow: 2,
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 2,
+            backgroundColor: "background.paper",
+            "& .MuiDataGrid-cell:focus": { outline: "none" },
+          }}
+        />
+      </div>
+    </Stack>
   );
 }
