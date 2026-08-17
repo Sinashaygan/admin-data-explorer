@@ -585,10 +585,3 @@ docs(orders): document admin data explorer
 This project is currently intended for internal, educational, or portfolio use.
 
 Add the appropriate license here if the project is later published under an open-source license.
-
-
-### دو نکته مهم
-
-1. در بخش `Tech Stack` بهتر است نسخه‌ی دقیق `TypeScript` را از `package.json` بررسی کنی؛ چون در dependencyهایی که فرستادی، نسخه‌ی TypeScript نمایش داده نشده است. بنابراین عبارت `TypeScript — Strict` به تنظیمات `tsconfig.json` اشاره دارد، نه نسخه‌ی پکیج.
-
-2. اگر فایل `.env.example` در پروژه وجود ندارد، در README بهتر است جمله‌ی مربوط به `cp .env.example .env.local` حذف شود و فقط روش ساخت `.env.local` نوشته شود؛ چون README نباید به فایل غیرواقعی ارجاع بدهد.
