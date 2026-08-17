@@ -7,6 +7,8 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { useEffect } from "react";
 
 import { useUpdateOrderStatus } from "../hooks/useUpdateOrderStatus";
 import type { OrderStatus } from "../model/order.types";
@@ -19,6 +21,15 @@ type OrderStatusMenuProps = {
 
 export function OrderStatusMenu({ orderId, value }: OrderStatusMenuProps) {
   const mutation = useUpdateOrderStatus();
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (mutation.isError) {
+      enqueueSnackbar(mutation.error.message, {
+        variant: "error",
+      });
+    }
+  }, [mutation.isError, mutation.error, enqueueSnackbar]);
 
   const handleChange = (event: SelectChangeEvent<OrderStatus>) => {
     mutation.mutate({
