@@ -10,10 +10,10 @@ export function useOrders() {
   const dbQuery = useMemo(() => toOrdersDatabaseQuery(filters), [filters]);
 
   const query = useQuery({
-    queryKey: ["orders", filters], 
+    queryKey: ["orders", "list", filters],
     queryFn: () => getOrders(dbQuery),
-    placeholderData: keepPreviousData, 
-    staleTime: 60 * 1000, 
+    placeholderData: keepPreviousData,
+    staleTime: 60 * 1000,
   });
 
   return {

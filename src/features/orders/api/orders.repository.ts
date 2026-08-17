@@ -1,6 +1,11 @@
 import { supabase } from "@/src/lib/supabase";
 import { getNextUtcDate } from "../model/order.query-mapper";
-import { Order, OrdersDatabaseQuery, OrdersPage } from "../model/order.types";
+import {
+  Order,
+  OrdersDatabaseQuery,
+  OrdersPage,
+  OrderStatus,
+} from "../model/order.types";
 
 const ORDERS_SELECT =
   "id, order_number, customer_name, customer_email, status, total_amount, items_count, shipping_address, created_at";
@@ -54,3 +59,26 @@ export async function getOrders(
     total: count ?? 0,
   };
 }
+
+export async function updateOrderStatus(
+  orderId: string,
+  status: OrderStatus,
+): Promise<Order> {
+  console.log("updateOrderStatus input:", { orderId, status });
+  const { data, error } = await supabase
+    .from("orders")
+    .update({
+      status,
+      // updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as Order;
+}
+

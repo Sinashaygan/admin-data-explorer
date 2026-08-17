@@ -17,11 +17,9 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { CustomGridToolbar } from "./GridToolbar";
 import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
 import { GridError } from "./GridError";
+import { OrderStatusMenu } from "./OrderStatusMenu";
 
-const ORDER_STATUS_COLORS: Record<
-  OrderStatus,
-  ChipProps["color"]
-> = {
+const ORDER_STATUS_COLORS: Record<OrderStatus, ChipProps["color"]> = {
   pending: "warning",
   processing: "info",
   shipped: "primary",
@@ -30,8 +28,10 @@ const ORDER_STATUS_COLORS: Record<
 };
 
 export function OrdersGrid() {
-  const { data, isLoading, filters, setFilters, isError ,error , refetch} = useOrders();
-  const [columnVisibility , setColumnVisibility] = useState<GridColumnVisibilityModel>({});
+  const { data, isLoading, filters, setFilters, isError, error, refetch } =
+    useOrders();
+  const [columnVisibility, setColumnVisibility] =
+    useState<GridColumnVisibilityModel>({});
 
   const columns: GridColDef[] = [
     {
@@ -57,6 +57,19 @@ export function OrdersGrid() {
         );
       },
     },
+    // {
+    //   field: "status",
+    //   headerName: "Status",
+    //   width: 180,
+    //   sortable: false,
+    //   renderCell: (params) => {
+    //     const orderId = String(params.row.id);
+    //     const status = params.value as OrderStatus;
+
+    //     return <OrderStatusMenu orderId={orderId} value={status} />;
+    //   },
+    // },
+
     {
       field: "total_amount",
       headerName: "Amount",
@@ -72,21 +85,27 @@ export function OrdersGrid() {
       field: "actions",
       type: "actions",
       headerName: "Actions",
-      width: 100,
-      getActions: (params) => [
-        <Tooltip title="View Details" key="view">
-          <IconButton onClick={() => console.log("View Order:", params.id)}>
-            <VisibilityIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>,
-        <Tooltip title="More Actions" key="more">
-          <IconButton onClick={() => console.log("More Actions:", params.id)}>
-            <MoreVertIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>,
-      ],
+      width: 200,
+      getActions: (params) => {
+        const orderId = String(params.row.id);
+        const status = params.row.status as OrderStatus;
+
+        return [
+          <Tooltip title="View Details" key="view">
+            <IconButton onClick={() => console.log("View Order:", params.id)}>
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>,
+          <OrderStatusMenu key="status" orderId={orderId} value={status} />,
+          <Tooltip title="More Actions" key="more">
+            <IconButton onClick={() => console.log("More Actions:", params.id)}>
+              <MoreVertIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>,
+        ];
+      },
     },
-  ]; 
+  ];
 
   const paginationModel = useMemo(
     () => ({ page: filters.page, pageSize: filters.pageSize }),
@@ -133,7 +152,6 @@ export function OrdersGrid() {
   };
 
   if (isError) return <GridError error={error} reset={() => refetch()} />;
-
 
   return (
     <div style={{ height: 600, width: "100%" }}>
