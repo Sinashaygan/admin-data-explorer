@@ -82,3 +82,27 @@ export async function updateOrderStatus(
   return data as Order;
 }
 
+export async function updateOrderStatusSecurely(
+  orderId: string,
+  status: OrderStatus,
+  lastKnownUpdate: string, // زمان آخرین آپدیتی که کلاینت دیده
+): Promise<Order> {
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", orderId)
+    .eq("updated_at", lastKnownUpdate) // شرط حیاتی: فقط اگر دیتای کلاینت آپدیت باشد
+    .select("*")
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      // رکورد پیدا نشد (احتمالاً به خاطر عدم تطابق updated_at)
+      throw new Error(
+        "ORDER_CONCURRENCY_ERROR: Order was modified by another user.",
+      );
+    }
+    throw error;
+  }
+  return data;
+}
