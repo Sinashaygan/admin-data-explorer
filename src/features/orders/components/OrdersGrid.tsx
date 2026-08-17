@@ -29,6 +29,7 @@ import { GridError } from "./GridError";
 import { CustomLoadingOverlay, CustomNoRowsOverlay } from "./GridOverlays";
 import { CustomGridToolbar } from "./GridToolbar";
 import { OrdersBulkActions } from "./OrdersBulkActions";
+import { OrdersSummary } from "./OrdersSummary";
 import { OrderStatusMenu } from "./OrderStatusMenu";
 
 const ORDER_STATUS_COLORS: Record<OrderStatus, ChipProps["color"]> = {
@@ -173,6 +174,8 @@ export function OrdersGrid() {
 
   return (
     <Stack spacing={3}>
+      <OrdersSummary orders={rows} loading={isLoading} />
+
       <OrdersBulkActions
         selectedRows={selectedRows}
         onClear={clearSelection}
