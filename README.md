@@ -164,7 +164,7 @@ src/
 │   └── csv-helper.ts
 │
 └── theme/
-
+```
 ### Directory Responsibilities
 
 | Directory | Responsibility |
