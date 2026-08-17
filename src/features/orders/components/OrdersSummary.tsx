@@ -63,11 +63,11 @@ export function OrdersSummary({ orders, loading }: OrdersSummaryProps) {
   return (
     <Stack spacing={2}>
       <Box>
-        <Typography variant="h5" fontWeight={700}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
           Orders summary
         </Typography>
-        <Typography variant="body2" color="text.secondary" lang="fa" dir="rtl">
-          آمار مربوط به نتایج فیلترشده فعلی است.
+        <Typography variant="body2" color="text.secondary" >
+          The statistics reflect the currently filtered results.
         </Typography>
         <Typography variant="caption" color="text.secondary">
           Server-side pagination means these figures cover the currently loaded
@@ -139,7 +139,9 @@ export function OrdersSummary({ orders, loading }: OrdersSummaryProps) {
               />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis
-                tickFormatter={(value: number) => currencyFormatter.format(value)}
+                tickFormatter={(value: number) =>
+                  currencyFormatter.format(value)
+                }
               />
               <Tooltip
                 formatter={(value) => currencyFormatter.format(Number(value))}
@@ -165,7 +167,7 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
       <Typography variant="body2" color="text.secondary">
         {label}
       </Typography>
-      <Typography variant="h5" fontWeight={700}>
+      <Typography variant="h5" sx={{fontWeight:700}}>
         {value}
       </Typography>
     </Paper>
@@ -183,7 +185,7 @@ function ChartCard({
 }) {
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600} mb={1}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600 , mb:1}}>
         {title}
       </Typography>
       <Box sx={{ height: 280, minWidth: 0 }}>
