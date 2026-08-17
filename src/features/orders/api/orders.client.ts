@@ -5,7 +5,7 @@ export async function patchOrderStatus(
   status: OrderStatus,
 ): Promise<Order> {
     const response = await fetch(
-      `api/orders/${encodeURIComponent(orderId)}/status`,
+      `/api/orders/${encodeURIComponent(orderId)}/status`,
       {
         method: "PATCH",
         headers: {
