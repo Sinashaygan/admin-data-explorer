@@ -64,11 +64,12 @@ export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
 ): Promise<Order> {
+  console.log("updateOrderStatus input:", { orderId, status });
   const { data, error } = await supabase
     .from("orders")
     .update({
       status,
-      updated_at: new Date().toISOString(),
+      // updated_at: new Date().toISOString(),
     })
     .eq("id", orderId)
     .select("*")
@@ -80,3 +81,4 @@ export async function updateOrderStatus(
 
   return data as Order;
 }
+
